@@ -2,6 +2,7 @@ package com.syn.synaturequeue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,14 +20,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 @SuppressLint("NewApi")
-public class SynatureQueue extends LinearLayout implements Runnable, 
+public class SynatureQueue extends LinearLayout implements 
 	QueueServerSocket.ServerSocketListener, SpeakCallingQueue.OnPlaySoundListener{
 	
 	public static final int SPEAK_DELAYED = 10 * 100;
 	public static final int UPDATE_QUEUE_INTERVAL = 10 * 1000;
 	public static final int LIMIT_SPEAK_TIME = 3;
-	
-	private boolean mIsSpeaking = false;
 	
 	/**
 	 * Thread for run listener socket 
@@ -47,7 +46,7 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	/**
 	 * Thread for load queue collection
 	 */
-	private Thread mLoadCallingQueueThread;
+	private Thread mLoadCallingPlaylistThread;
 
 	/**
 	 * Queue sound player
@@ -78,16 +77,17 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	private ListView mLvB;
 	private ListView mLvC;
 
-	public SynatureQueue(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		mContext = context;
-		setupView();
-	}
-
+	/**
+	 * @param context
+	 * @param shopId
+	 * @param serverUrl
+	 * @param soundDir
+	 */
 	public SynatureQueue(Context context, String shopId, String serverUrl,
 			String soundDir){
-		this(context, null);
+		super(context, null);
 
+		mContext = context;
 		mShopId = shopId;
 		mServerUrl = serverUrl;
 		mServerUrl += "/ws_mpos.asmx";
@@ -97,6 +97,7 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 		mSpeakCallingQueue = new SpeakCallingQueue(mContext, 
 				mSoundDir, this);
 		mHandlerSpeakQueue = new Handler();
+		setupView();
 	}
 
 	private void setupView() {
@@ -130,7 +131,12 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	 * Schedule update queue 
 	 */
 	private void startUpdateQueue(){
-		mTimerUpdateQueue.schedule(new UpdateQueueTask(), 1000, UPDATE_QUEUE_INTERVAL);
+		try {
+			mTimerUpdateQueue.schedule(new UpdateQueueTask(), 1000, UPDATE_QUEUE_INTERVAL);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -149,17 +155,18 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		startSocket();
 		startUpdateQueue();
 		startLoadQueueThread();
+		startSocket();
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
-		stopSocket();
 		stopUpdateQueue();
 		stopLoadQueueThread();
 		mHandlerSpeakQueue.removeCallbacks(mSpeakQueueRunnable);
+		stopSocket();
+		closeSocket();
 		super.onDetachedFromWindow();
 	}
 
@@ -168,9 +175,6 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	 * @param queueDisplayInfo
 	 */
 	private void updateQueue(QueueDisplayInfo queueDisplayInfo){
-		QueueName qA = new QueueName();
-		QueueName qB = new QueueName();
-		QueueName qC = new QueueName();
 		List<QueueDisplayInfo.QueueInfo> listA = 
 				new ArrayList<QueueDisplayInfo.QueueInfo>();
 		List<QueueDisplayInfo.QueueInfo> listB = 
@@ -200,38 +204,44 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 		
 		if(!queueDisplayInfo.getSzCurQueueGroupA().isEmpty()){
 			String callingA = queueDisplayInfo.getSzCurQueueGroupA();
+			String custA = queueDisplayInfo.getSzCurQueueCustomerA();
 			mTvCallingA.setText(callingA);
-			mTvCustA.setText(callingA);
-			qA.setQueueName(callingA);
-			if(!mQueueNameLst.contains(qA) && !mIsSpeaking)
-				mQueueNameLst.add(qA);
+			mTvCustA.setText(custA);
+			if(!checkAddedQueue(callingA)){
+				mQueueNameLst.add(new QueueName(1, callingA));
+			}
 		}else{
 			mTvCallingA.setText(null);
 			mTvCustA.setText(null);
+			removeQueue(1);
 		}
 		
 		if(!queueDisplayInfo.getSzCurQueueGroupB().isEmpty()){
 			String callingB = queueDisplayInfo.getSzCurQueueGroupB();
+			String custB = queueDisplayInfo.getSzCurQueueCustomerB();
 			mTvCallingB.setText(callingB);
-			mTvCustB.setText(callingB);
-			qB.setQueueName(callingB);
-			if(!mQueueNameLst.contains(qB) && !mIsSpeaking)
-				mQueueNameLst.add(qB);
+			mTvCustB.setText(custB);
+			if(!checkAddedQueue(callingB)){
+				mQueueNameLst.add(new QueueName(2, callingB));
+			}
 		}else{
 			mTvCallingB.setText(null);
 			mTvCustB.setText(null);
+			removeQueue(2);
 		}
 		
 		if(!queueDisplayInfo.getSzCurQueueGroupC().isEmpty()){
 			String callingC = queueDisplayInfo.getSzCurQueueGroupC();
+			String custC = queueDisplayInfo.getSzCurQueueCustomerC();
 			mTvCallingC.setText(callingC);
-			mTvCustC.setText(callingC);
-			qC.setQueueName(callingC);
-			if(!mQueueNameLst.contains(qC) && !mIsSpeaking)
-				mQueueNameLst.add(qC);
+			mTvCustC.setText(custC);
+			if(!checkAddedQueue(callingC)){
+				mQueueNameLst.add(new QueueName(3, callingC));
+			}
 		}else{
 			mTvCallingC.setText(null);
 			mTvCustC.setText(null);
+			removeQueue(3);
 		}
 		
 		mLvA.setAdapter(new TableQueueAdapter(mContext, listA));
@@ -294,34 +304,70 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 		@Override
 		public void run() {
 			if(mQueueNameLst.size() > 0){
-				QueueName q = mQueueNameLst.get(mCurrentQueueIdx);
-				int callingTime = q.getCallingTime();
-				if(callingTime < LIMIT_SPEAK_TIME){
-					try {
-						mSpeakCallingQueue.speak(q.getQueueName());
-						q.setCallingTime(++callingTime);
-						mQueueNameLst.set(mCurrentQueueIdx, q);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}	
+				try {
+					QueueName q = mQueueNameLst.get(mCurrentQueueIdx);
+					int callingTime = q.getCallingTime();
+					if(callingTime < LIMIT_SPEAK_TIME){
+						try {
+							mSpeakCallingQueue.speak(q.getQueueName());
+							q.setCallingTime(++callingTime);
+							mQueueNameLst.set(mCurrentQueueIdx, q);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else{
+						// skip 
+						onSpeakComplete();
+					}
+				} catch (Exception e) {
+					// skip
+					onSpeakComplete();
+					e.printStackTrace();
 				}
 			}
 		}
 		
 	};
 
+	/**
+	 * Thread for load queue playlist
+	 */
 	private void startLoadQueueThread(){
-		mLoadCallingQueueThread = new Thread(this);
-		mLoadCallingQueueThread.start();
+		mLoadCallingPlaylistThread = new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				try {
+					while(!mLoadCallingPlaylistThread.isInterrupted()){
+						if(mCurrentQueueIdx == -1){
+							if(mQueueNameLst.size() > 0){
+								mCurrentQueueIdx = 0;
+								mHandlerSpeakQueue.postDelayed(mSpeakQueueRunnable, SPEAK_DELAYED);
+							}
+						}
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally{
+					mLoadCallingPlaylistThread = null;
+				}
+			}
+			
+		});
+		mLoadCallingPlaylistThread.start();
 	}
 	
+	/**
+	 * stop load calling sound playlist
+	 */
 	private synchronized void stopLoadQueueThread(){
-		if(mLoadCallingQueueThread != null)
+		if(mLoadCallingPlaylistThread != null)
 		{
 			try {
-				mLoadCallingQueueThread.interrupt();
-				mLoadCallingQueueThread = null;
+				mLoadCallingPlaylistThread.interrupt();
+				mLoadCallingPlaylistThread = null;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -329,6 +375,9 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 		}
 	}
 	
+	/**
+	 * Start server socket
+	 */
 	private void startSocket(){
 		if(!this.mServerUrl.isEmpty()){
 			try {
@@ -342,6 +391,9 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 		}	
 	}
 	
+	/**
+	 * Stop socket thread
+	 */
 	private synchronized void stopSocket(){
 		if(mConnThread != null)
 		{
@@ -352,6 +404,18 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	/**
+	 * Close socket
+	 */
+	private void closeSocket(){
+		try {
+			mSocket.closeSocket();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -368,18 +432,6 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 	}
 
 	@Override
-	public void run() {
-		while(!mLoadCallingQueueThread.isInterrupted()){
-			if(mCurrentQueueIdx == -1){
-				if(mQueueNameLst.size() > 0){
-					mCurrentQueueIdx = 0;
-					mHandlerSpeakQueue.postDelayed(mSpeakQueueRunnable, SPEAK_DELAYED);
-				}
-			}
-		}
-	}
-
-	@Override
 	public void onReceipt(String msg) {
 		stopUpdateQueue();
 		startUpdateQueue();
@@ -391,20 +443,10 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 
 	@Override
 	public void onSpeaking() {
-		
 	}
 
 	@Override
 	public void onSpeakComplete() {
-		QueueName q = mQueueNameLst.get(mCurrentQueueIdx);
-		if(q != null){
-			if(q.getCallingTime() < LIMIT_SPEAK_TIME){
-				mIsSpeaking = true;
-			}else{
-				mIsSpeaking = false;
-				mQueueNameLst.remove(q);
-			}
-		}
 		if(mCurrentQueueIdx < mQueueNameLst.size() - 1){
 			mHandlerSpeakQueue.postDelayed(mSpeakQueueRunnable, SPEAK_DELAYED);
 			mCurrentQueueIdx++;
@@ -412,15 +454,51 @@ public class SynatureQueue extends LinearLayout implements Runnable,
 			mCurrentQueueIdx = -1;
 		}
 	}
+
+	private int removeQueue(int queueGroupId){
+		Iterator<QueueName> it = mQueueNameLst.iterator();
+		while(it.hasNext()){
+			QueueName q = it.next();
+			if(q.getQueueGroupId() == queueGroupId)
+			{
+				it.remove();
+				return 1;
+			}
+		}
+		return 0;
+	}
+	
+	private boolean checkAddedQueue(String queueName){
+		Iterator<QueueName> it = mQueueNameLst.iterator();
+		while(it.hasNext()){
+			QueueName q = it.next();
+			if(q.getQueueName().equals(queueName))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * @author j1tth4
 	 * 
 	 */
 	private class QueueName{
+		private int queueGroupId;
 		private String queueName;
 		private int callingTime;
 		
+		public QueueName(int queueGroupId, String queueName){
+			this.queueName = queueName;
+			this.queueGroupId = queueGroupId;
+		}
+		public int getQueueGroupId() {
+			return queueGroupId;
+		}
+		public void setQueueGroupId(int queueGroupId) {
+			this.queueGroupId = queueGroupId;
+		}
 		public String getQueueName() {
 			return queueName;
 		}
