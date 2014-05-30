@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textAppearance="@style/LargeFont"
         android:textColor="@color/white" />
 
     <LinearLayout
@@ -20,10 +20,12 @@
         android:background="@drawable/header_background"
         android:gravity="center"
         android:minHeight="64dp"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="4dp" >
 
         <TextView
             android:id="@+id/tvCalling"
+            style="@style/LargerFont"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -36,8 +38,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/white" />
+            android:maxLines="1"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/blue" />
 
     </LinearLayout>
 
@@ -50,10 +53,12 @@
 
     <TextView
         android:id="@+id/tvSum"
+        style="@style/LargeFont"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/header_background"
         android:gravity="center"
+        android:padding="4dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 

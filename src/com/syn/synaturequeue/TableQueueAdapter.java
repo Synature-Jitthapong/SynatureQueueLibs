@@ -48,7 +48,7 @@ public class TableQueueAdapter extends BaseAdapter{
 		}
 		QueueDisplayInfo.QueueInfo queueInfo = mQueueLst.get(position);
 		holder.tvQueueName.setText(queueInfo.getSzQueueName());
-		holder.tvQueueSummary.setText(queueInfo.getSzCustomerName());
+		//holder.tvQueueSummary.setText(queueInfo.getSzCustomerName());
 		return convertView;
 	}
 

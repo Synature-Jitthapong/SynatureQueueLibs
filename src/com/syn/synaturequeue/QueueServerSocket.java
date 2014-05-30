@@ -21,7 +21,7 @@ public class QueueServerSocket implements Runnable{
 	public void run() {
 		Socket socket = null;
 		try {
-			while(!Thread.interrupted()){
+			while(!Thread.currentThread().isInterrupted()){
 				try {
 					socket = mSocket.accept();
 					BufferedReader bf = new BufferedReader(new InputStreamReader(socket.getInputStream()));

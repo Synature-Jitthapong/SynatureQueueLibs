@@ -3,10 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:padding="4dp" >
 
     <TextView
         android:id="@+id/tvQueueName"
+        style="@style/LargeFont"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -33,7 +35,7 @@
         android:paddingTop="0dp"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
 </RelativeLayout>

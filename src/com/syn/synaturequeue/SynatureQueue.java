@@ -12,7 +12,6 @@ import com.syn.pos.QueueDisplayInfo;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -23,8 +22,10 @@ import android.widget.TextView;
 public class SynatureQueue extends LinearLayout implements 
 	QueueServerSocket.ServerSocketListener, SpeakCallingQueue.OnPlaySoundListener{
 	
+	public static final String TAG = SynatureQueue.class.getSimpleName();
+	
 	public static final int SPEAK_DELAYED = 10 * 100;
-	public static final int UPDATE_QUEUE_INTERVAL = 10 * 1000;
+	public static final int UPDATE_QUEUE_INTERVAL = 10 * 10000;
 	public static final int LIMIT_SPEAK_TIME = 3;
 	
 	/**
@@ -93,7 +94,6 @@ public class SynatureQueue extends LinearLayout implements
 		mServerUrl += "/ws_mpos.asmx";
 		mSoundDir = soundDir;
 		
-		mTimerUpdateQueue = new Timer();
 		mSpeakCallingQueue = new SpeakCallingQueue(mContext, 
 				mSoundDir, this);
 		mHandlerSpeakQueue = new Handler();
@@ -132,6 +132,7 @@ public class SynatureQueue extends LinearLayout implements
 	 */
 	private void startUpdateQueue(){
 		try {
+			mTimerUpdateQueue = new Timer();
 			mTimerUpdateQueue.schedule(new UpdateQueueTask(), 1000, UPDATE_QUEUE_INTERVAL);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -155,18 +156,18 @@ public class SynatureQueue extends LinearLayout implements
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
+		startSocket();
 		startUpdateQueue();
 		startLoadQueueThread();
-		startSocket();
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
 		stopUpdateQueue();
 		stopLoadQueueThread();
-		mHandlerSpeakQueue.removeCallbacks(mSpeakQueueRunnable);
 		stopSocket();
 		closeSocket();
+		mHandlerSpeakQueue.removeCallbacks(mSpeakQueueRunnable);
 		super.onDetachedFromWindow();
 	}
 
@@ -206,7 +207,7 @@ public class SynatureQueue extends LinearLayout implements
 			String callingA = queueDisplayInfo.getSzCurQueueGroupA();
 			String custA = queueDisplayInfo.getSzCurQueueCustomerA();
 			mTvCallingA.setText(callingA);
-			mTvCustA.setText(custA);
+			//mTvCustA.setText(custA);
 			if(!checkAddedQueue(callingA)){
 				mQueueNameLst.add(new QueueName(1, callingA));
 			}
@@ -220,7 +221,7 @@ public class SynatureQueue extends LinearLayout implements
 			String callingB = queueDisplayInfo.getSzCurQueueGroupB();
 			String custB = queueDisplayInfo.getSzCurQueueCustomerB();
 			mTvCallingB.setText(callingB);
-			mTvCustB.setText(custB);
+			//mTvCustB.setText(custB);
 			if(!checkAddedQueue(callingB)){
 				mQueueNameLst.add(new QueueName(2, callingB));
 			}
@@ -234,7 +235,7 @@ public class SynatureQueue extends LinearLayout implements
 			String callingC = queueDisplayInfo.getSzCurQueueGroupC();
 			String custC = queueDisplayInfo.getSzCurQueueCustomerC();
 			mTvCallingC.setText(callingC);
-			mTvCustC.setText(custC);
+			//mTvCustC.setText(custC);
 			if(!checkAddedQueue(callingC)){
 				mQueueNameLst.add(new QueueName(3, callingC));
 			}
@@ -379,16 +380,14 @@ public class SynatureQueue extends LinearLayout implements
 	 * Start server socket
 	 */
 	private void startSocket(){
-		if(!this.mServerUrl.isEmpty()){
-			try {
-				mSocket = new QueueServerSocket(this);
-				mConnThread = new Thread(mSocket);
-				mConnThread.start();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}	
+		try {
+			mSocket = new QueueServerSocket(this);
+			mConnThread = new Thread(mSocket);
+			mConnThread.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
