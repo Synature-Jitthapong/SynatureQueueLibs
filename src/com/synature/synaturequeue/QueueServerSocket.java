@@ -1,4 +1,4 @@
-package com.syn.synaturequeue;
+package com.synature.synaturequeue;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.syn.synaturequeue;
+package com.synature.synaturequeue;
 
 public interface WebServiceProgressListener {
 	void onPre();

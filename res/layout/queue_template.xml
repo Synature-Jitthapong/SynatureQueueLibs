@@ -1,41 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:divider="?android:attr/listDivider"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="4dp" >
+    android:padding="4dp"
+    android:showDividers="end" >
 
     <TextView
         android:id="@+id/tvQueueName"
         style="@style/LargeFont"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="0dp"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/white" />
 
-    <TextView
-        android:id="@+id/tvCustName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/tvQueueName"
-        android:ellipsize="marquee"
-        android:fadingEdge="horizontal"
-        android:gravity="center"
-        android:lines="1"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:paddingBottom="4dp"
-        android:paddingTop="0dp"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/white" />
-
-</RelativeLayout>
+</LinearLayout>

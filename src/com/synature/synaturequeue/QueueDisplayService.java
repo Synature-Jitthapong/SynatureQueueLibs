@@ -1,10 +1,11 @@
-package com.syn.synaturequeue;
+package com.synature.synaturequeue;
 
 import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.syn.pos.QueueDisplayInfo;
+import com.synature.pos.QueueDisplayInfo;
+
 import android.content.Context;
 
 public class QueueDisplayService extends QueueDisplayMainService {

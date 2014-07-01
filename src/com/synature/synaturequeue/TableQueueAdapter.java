@@ -1,7 +1,9 @@
-package com.syn.synaturequeue;
+package com.synature.synaturequeue;
 
 import java.util.List;
-import com.syn.pos.QueueDisplayInfo;
+
+import com.synature.pos.QueueDisplayInfo;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,19 +43,16 @@ public class TableQueueAdapter extends BaseAdapter{
 			convertView = mInflater.inflate(R.layout.queue_template, null);
 			holder = new ViewHolder();
 			holder.tvQueueName = (TextView) convertView.findViewById(R.id.tvQueueName);
-			holder.tvQueueSummary = (TextView) convertView.findViewById(R.id.tvCustName);
 			convertView.setTag(holder);
 		}else{
 			holder = (ViewHolder) convertView.getTag();
 		}
 		QueueDisplayInfo.QueueInfo queueInfo = mQueueLst.get(position);
 		holder.tvQueueName.setText(queueInfo.getSzQueueName());
-		//holder.tvQueueSummary.setText(queueInfo.getSzCustomerName());
 		return convertView;
 	}
 
 	public static class ViewHolder{
 		TextView tvQueueName;
-		TextView tvQueueSummary;
 	}
 }

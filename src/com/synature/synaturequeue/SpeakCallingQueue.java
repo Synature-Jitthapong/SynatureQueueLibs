@@ -1,9 +1,9 @@
-package com.syn.synaturequeue;
+package com.synature.synaturequeue;
 
 import java.io.File;
 import java.io.IOException;
 
-import com.j1tth4.util.MediaManager;
+import com.synature.util.MediaManager;
 
 import android.content.Context;
 import android.media.MediaPlayer;
@@ -27,6 +27,8 @@ public class SpeakCallingQueue implements
 		String soundPath = getCallingSoundPath(queueText);
 		if(soundPath != null)
 			playSound(soundPath);
+		else
+			mOnPlaySoundListener.onSpeakComplete();
 	}
 	
 	private void playSound(String soundPath){
@@ -37,17 +39,17 @@ public class SpeakCallingQueue implements
 			mMediaPlayer.setOnPreparedListener(this);
 			mMediaPlayer.setOnCompletionListener(this);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mOnPlaySoundListener.onSpeakComplete();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mOnPlaySoundListener.onSpeakComplete();
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mOnPlaySoundListener.onSpeakComplete();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mOnPlaySoundListener.onSpeakComplete();
 		}
 	}
 	
