@@ -129,6 +129,27 @@ public class SynatureQueue extends LinearLayout implements
 		setupView();
 	}
 
+	/**
+	 * @param context
+	 * @param shopId
+	 * @param serverUrl
+	 * @param soundDir
+	 */
+	public SynatureQueue(Context context, String shopId, String serverUrl,
+			String soundDir){
+		this(context, shopId, serverUrl, soundDir, DEFAULT_GROUP_QUEUE, 
+				LIMIT_SPEAK_TIME, new SpeakCallingQueue.OnPlaySoundListener() {
+					
+					@Override
+					public void onSpeaking() {
+					}
+					
+					@Override
+					public void onSpeakComplete() {
+					}
+		});
+	}
+	
 	private void setupView() {
 		LayoutInflater inflater = (LayoutInflater)
 				mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
