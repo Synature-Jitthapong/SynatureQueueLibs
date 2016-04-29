@@ -249,54 +249,62 @@ public class SynatureQueue extends LinearLayout implements
 				new ArrayList<QueueDisplayInfo.QueueInfo>();
 		List<QueueDisplayInfo.QueueInfo> listC = 
 				new ArrayList<QueueDisplayInfo.QueueInfo>();
+		List<QueueDisplayInfo.QueueInfo> listD = 
+				new ArrayList<QueueDisplayInfo.QueueInfo>();
 		
 		int totalQueueA = 0;
 		int totalQueueB = 0;
 		int totalQueueC = 0;
+		int totalQueueD = 0;
 		for(QueueDisplayInfo.QueueInfo queueInfo : queueDisplayInfo.xListQueueInfo){
 			if(queueInfo.getiQueueGroupID() == 1){
 				listA.add(queueInfo);
 				totalQueueA++;
 			}
-			
 			if(queueInfo.getiQueueGroupID() == 2){
 				listB.add(queueInfo);
 				totalQueueB++;
 			}
-			
 			if(queueInfo.getiQueueGroupID() == 3){
 				listC.add(queueInfo);
 				totalQueueC++;
 			}
+			if(queueInfo.getiQueueGroupID() == 4){
+				listD.add(queueInfo);
+				totalQueueD++;
+			}
 		}
-		
 		if(!queueDisplayInfo.getSzCurQueueGroupA().isEmpty()){
 			String callingA = queueDisplayInfo.getSzCurQueueGroupA();
 			mTvCallingA.setText(callingA);
 		}else{
 			mTvCallingA.setText(null);
 		}
-		
 		if(!queueDisplayInfo.getSzCurQueueGroupB().isEmpty()){
 			String callingB = queueDisplayInfo.getSzCurQueueGroupB();
 			mTvCallingB.setText(callingB);
 		}else{
 			mTvCallingB.setText(null);
 		}
-		
 		if(!queueDisplayInfo.getSzCurQueueGroupC().isEmpty()){
 			String callingC = queueDisplayInfo.getSzCurQueueGroupC();
 			mTvCallingC.setText(callingC);
 		}else{
 			mTvCallingC.setText(null);
+		}if(!queueDisplayInfo.getSzCurQueueGroupD().isEmpty()){
+			String callingD = queueDisplayInfo.getSzCurQueueGroupD();
+			mTvCallingD.setText(callingD);
+		}else{
+			mTvCallingD.setText(null);
 		}
-		
 		mLvA.setAdapter(new TableQueueAdapter(mContext, listA));
 		mLvB.setAdapter(new TableQueueAdapter(mContext, listB));
 		mLvC.setAdapter(new TableQueueAdapter(mContext, listC));
+		mLvD.setAdapter(new TableQueueAdapter(mContext, listD));
 		mTvSumA.setText(String.valueOf(totalQueueA));
 		mTvSumB.setText(String.valueOf(totalQueueB));
 		mTvSumC.setText(String.valueOf(totalQueueC));
+		mTvSumD.setText(String.valueOf(totalQueueD));
 	}
 
 	/**
